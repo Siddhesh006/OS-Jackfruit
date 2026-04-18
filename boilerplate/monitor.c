@@ -18,7 +18,6 @@
 #define DEVICE_NAME "container_monitor"
 #define CHECK_INTERVAL_SEC 1
 
-
 struct monitored_entry {
   pid_t pid;
   char container_id[MONITOR_NAME_LEN];
@@ -28,16 +27,13 @@ struct monitored_entry {
   struct list_head list;
 };
 
-
 static LIST_HEAD(monitored_list);
 static DEFINE_MUTEX(monitored_list_lock);
 
-static DEFINE_MUTEX(monitored_list_lock);
 static struct timer_list monitor_timer;
 static dev_t dev_num;
 static struct cdev c_dev;
 static struct class *cl;
-
 
 static long get_rss_bytes(pid_t pid) {
   struct task_struct *task;
@@ -124,7 +120,6 @@ static void timer_callback(struct timer_list *t) {
   mod_timer(&monitor_timer, jiffies + CHECK_INTERVAL_SEC * HZ);
 }
 
-
 static long monitor_ioctl(struct file *f, unsigned int cmd, unsigned long arg) {
   struct monitor_request req;
 
@@ -144,7 +139,7 @@ static long monitor_ioctl(struct file *f, unsigned int cmd, unsigned long arg) {
 
     struct monitored_entry *entry;
 
-    if (req->soft_limit_bytes > req->hard_limit_bytes) {
+    if (req.soft_limit_bytes > req.hard_limit_bytes) {
       printk(KERN_WARNING
              "[container_monitor] Register rejected: soft(%lu) > hard(%lu)\n",
              req.soft_limit_bytes, req.hard_limit_bytes);
@@ -169,7 +164,6 @@ static long monitor_ioctl(struct file *f, unsigned int cmd, unsigned long arg) {
 
     return 0;
   }
-
 
   printk(KERN_INFO
          "[container_monitor] Unregister request container=%s pid=%d\n",
@@ -204,7 +198,6 @@ static long monitor_ioctl(struct file *f, unsigned int cmd, unsigned long arg) {
            req.container_id, req.pid);
     return 0;
   }
-
 }
 
 static struct file_operations fops = {
@@ -261,7 +254,6 @@ static void __exit monitor_exit(void) {
     }
     mutex_unlock(&monitored_list_lock);
   }
-
 
   cdev_del(&c_dev);
   device_destroy(cl, dev_num);
